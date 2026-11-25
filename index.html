@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHOCOLATE HOUSE</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#faf7f1;color:#38251d}
+header{background:#38251d;color:white;padding:22px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:23px;font-weight:bold;letter-spacing:2px}
+.hero{text-align:center;padding:75px 20px;background:#eadac6}
+.hero h1{font-size:42px;margin:0 0 15px}
+.hero p{font-size:17px}
+button{background:#6b3d29;color:white;border:0;padding:12px 22px;border-radius:5px;cursor:pointer}
+button:hover{background:#38251d}
+.products{padding:45px 7%;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:25px;max-width:850px;margin:30px auto}
+.card{background:white;border-radius:12px;padding:20px;box-shadow:0 3px 15px #0001}
+.product-image{height:180px;background:#eadac6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:65px}
+.price{font-size:23px;font-weight:bold;color:#8b4e2d}
+.cart{background:white;padding:30px 7%;max-width:850px;margin:20px auto;border-radius:10px}
+input,textarea{width:100%;padding:12px;margin:8px 0 15px;border:1px solid #ddd;border-radius:5px;font-size:15px}
+footer{text-align:center;padding:25px;background:#38251d;color:white}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CHOCOLATE HOUSE</div>
+  <div>Premium Chocolate</div>
+</header>
+
+<section class="hero">
+  <h1>Happiness in Every Bite</h1>
+  <p>สัมผัสความสุขจากช็อกโกแลตคุณภาพพรีเมียม</p>
+  <a href="#products"><button>เลือกซื้อสินค้า</button></a>
+</section>
+
+<section class="products" id="products">
+  <h2>OUR CHOCOLATE</h2>
+  <p>เลือกความอร่อยในแบบที่คุณชอบ</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="product-image">🍫</div>
+      <h3>Dark Chocolate 70%</h3>
+      <p>SKU: CHO-001</p>
+      <p>ดาร์กช็อกโกแลตเข้มข้น 100 กรัม</p>
+      <div class="price">฿129</div>
+      <button onclick="addCart('CHO-001','Dark Chocolate 70%',129)">เพิ่มลงตะกร้า</button>
+    </div>
+
+    <div class="card">
+      <div class="product-image">🍫</div>
+      <h3>Milk Chocolate</h3>
+      <p>SKU: CHO-002</p>
+      <p>มิลค์ช็อกโกแลตเนื้อนุ่ม 100 กรัม</p>
+      <div class="price">฿119</div>
+      <button onclick="addCart('CHO-002','Milk Chocolate',119)">เพิ่มลงตะกร้า</button>
+    </div>
+  </div>
+</section>
+
+<section class="cart">
+  <h2>🛒 ตะกร้าสินค้า</h2>
+  <div id="cartItems">ยังไม่มีสินค้า</div>
+  <h3 id="total">รวม ฿0</h3>
+
+  <h2>ข้อมูลจัดส่ง</h2>
+  <form id="orderForm">
+    <label>ชื่อผู้รับ</label>
+    <input id="customer" required placeholder="ชื่อ-นามสกุล">
+
+    <label>เบอร์โทรศัพท์</label>
+    <input id="phone" required type="tel" placeholder="08xxxxxxxx">
+
+    <label>ที่อยู่จัดส่ง</label>
+    <textarea id="address" required rows="4" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+
+    <label>วิธีชำระเงิน</label>
+    <select id="payment" style="width:100%;padding:12px;margin:8px 0 15px">
+      <option>โอนเงินผ่านธนาคาร / QR PromptPay</option>
+    </select>
+
+    <button type="submit">ยืนยันคำสั่งซื้อ</button>
+  </form>
+  <p id="message"></p>
+</section>
+
+<footer>
+  <p>CHOCOLATE HOUSE</p>
+  <p>Thank you for choosing our chocolate.</p>
+</footer>
+
+<script>
+let cart = [];
+
+function addCart(sku,name,price){
+  let item=cart.find(x=>x.sku===sku);
+  if(item)item.qty++;
+  else cart.push({sku,name,price,qty:1});
+  renderCart();
+}
+
+function renderCart(){
+  const box=document.getElementById('cartItems');
+  if(!cart.length){
+    box.innerHTML='ยังไม่มีสินค้า';
+  }else{
+    box.innerHTML=cart.map(x=>
+      `<p>${x.name} (${x.sku}) × ${x.qty}
+      <button onclick="removeItem('${x.sku}')">ลบ</button></p>`
+    ).join('');
+  }
+  document.getElementById('total').innerText=
+    'รวม ฿'+cart.reduce((s,x)=>s+x.price*x.qty,0);
+}
+
+function removeItem(sku){
+  cart=cart.filter(x=>x.sku!==sku);
+  renderCart();
+}
+
+document.getElementById('orderForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(!cart.length){
+    alert('กรุณาเลือกสินค้าก่อน');
+    return;
+  }
+
+  const order={
+    id:'CH-'+Date.now(),
+    customer:document.getElementById('customer').value,
+    phone:document.getElementById('phone').value,
+    address:document.getElementById('address').value,
+    payment:document.getElementById('payment').value,
+    items:cart,
+    total:cart.reduce((s,x)=>s+x.price*x.qty,0),
+    status:'รอตรวจสอบการชำระเงิน'
+  };
+
+  const orders=JSON.parse(localStorage.getItem('ch_orders')||'[]');
+  orders.push(order);
+  localStorage.setItem('ch_orders',JSON.stringify(orders));
+
+  document.getElementById('message').innerText=
+    'บันทึกคำสั่งซื้อ '+order.id+' เรียบร้อยแล้ว';
+
+  cart=[];
+  renderCart();
+  this.reset();
+});
+</script>
+</body>
+</html>
